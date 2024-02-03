@@ -1,7 +1,7 @@
 module.exports = {
-    HOST: "localhost",
-    USER: "blog_user",
-    PASSWORD: "Veda@1996",
+    HOST: "db-vani-blogs.cejetezsp1f9.us-west-2.rds.amazonaws.com",
+    USER: "admin",
+    PASSWORD: "garPa6-burzyq-wowcir",
     DB: "blogs",
     dialect: "mysql",
     pool: {
