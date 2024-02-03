@@ -94,20 +94,19 @@ exports.userRegistration = async (req, res) => {
     }
 }
 
-exports.verifyUserToken = async (req, res) => {
+exports.verifyUserToken = async (req, res, next) => {
     try {
-
-        if (!this.isValidJwt(req)) {
+        const authHeader = req.headers['authorization'];
+        if (!this.isValidJwt(authHeader)) {
             throw new Error("JWT verification failed");
         }
-        
-        res.status(200).send();
+        next();
     } catch (Error) {
         res.status(401).send({ message: Error.message });
     }
 };
 
-exports.isValidJwt = (req) => {
+exports.isValidJwt = (authHeader) => {
 
     let token = authHeader && authHeader.split(' ')[1];
     if (!token) {
@@ -122,4 +121,5 @@ exports.isValidJwt = (req) => {
     if (((isValidToken.exp - isValidToken.iss) > 0)) {
         return false;
     }
+    return true;
 }

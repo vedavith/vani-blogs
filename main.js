@@ -34,8 +34,8 @@ app.post('/user/register', login.userRegistration);
 app.get('/blogs/all', blogs.getBlogs);
 app.get('/blog/:id/get', blogs.getBlogOnId);
 app.post('/blog/create', login.verifyUserToken, blogs.createBlog);
-app.put('/blog/:id/update', blogs.updateBlog);
-app.delete('blog/:id/delete', blogs.deleteBlog);
+app.put('/blog/:id/update', login.verifyUserToken, blogs.updateBlog);
+app.delete('blog/:id/delete', login.verifyUserToken, blogs.deleteBlog);
 
 // Start Server
 app.listen(port, () => {
