@@ -1,4 +1,7 @@
-module.exports = (sequelize, DataTypes) => {
+// Import Sequelize and DataTypes
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
     const auth = sequelize.define(
         'userAuth', {
         id: {

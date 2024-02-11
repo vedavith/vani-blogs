@@ -11,13 +11,14 @@ const authData = db.auth;
 
 exports.userLogin = async (req, res) => {
     res.contentType('json');
+    let loginUser;
     try {
         // Verify User
-        if (req.body.username == '' || req.body.password == '') {
+        if (req.body.username === '' || req.body.password === '') {
             throw new Error("Authentication Failed");
         }
 
-        loginUser = { email: req.body.username };
+        loginUser = {email: req.body.username};
         const user = await users.findOne({
             where: loginUser
         });
@@ -34,14 +35,14 @@ exports.userLogin = async (req, res) => {
         }
 
         // Generate JWT Token and update the token on each login
-        let userDetails = { id: user.id, email: user.email, name: user.first_name + " " + user.last_name };
+        let userDetails = {id: user.id, email: user.email, name: user.first_name + " " + user.last_name};
         let token = jwt.sign(userDetails, jwtSecret, jwtOptions);
 
         if (!token) {
             throw new Error("Access token not generation Failed");
         }
 
-        let userAuth = authData.update({ token: token }, {
+        let userAuth = authData.update({token: token}, {
             where: {
                 userId: user.id
             }
@@ -52,24 +53,25 @@ exports.userLogin = async (req, res) => {
         }
 
         res.setHeader('authorization', token);
-        res.send({ user: userDetails });
+        res.send({user: userDetails});
 
     } catch (Error) {
-        res.send({ Message: Error.message });
+        res.send({Message: Error.message});
     }
 };
 
 exports.userRegistration = async (req, res) => {
     res.contentType('json');
+    let auth;
     try {
         // user data validations
         var userData = req.body;
 
-        if (userData.email == '' || typeof userData.email == 'undefined') {
+        if (userData.email === '' || typeof userData.email == 'undefined') {
             throw new Error("Email is required");
         }
 
-        if (userData.password == '' || typeof userData.password == 'undefined') {
+        if (userData.password === '' || typeof userData.password == 'undefined') {
             throw new Error("Password is required");
         }
 
@@ -87,10 +89,10 @@ exports.userRegistration = async (req, res) => {
             if (!auth) {
                 throw new Error("Insert Failed");
             }
-            res.send({ message: "User created" });
+            res.send({message: "User created"});
         }
     } catch (Error) {
-        res.send({ message: Error.message });
+        res.send({message: Error.message});
     }
 }
 

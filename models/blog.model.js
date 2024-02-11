@@ -1,4 +1,7 @@
- module.exports = (sequelize, DataTypes) => {
+// Import Sequelize and DataTypes
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize, FileUploads, Users) => {
     const blog = sequelize.define('blog', {
         id: {
             type: DataTypes.INTEGER,
@@ -12,18 +15,16 @@
             type: DataTypes.STRING
         },
         image: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
         },
         content: {
             type: DataTypes.STRING(2000),
         }
     });
 
-    blog.associate = function(models) {
-        blog.belongsTo(models.User, {
-            foreignKey: 'userId',
-            onDelete: 'CASCADE'
-        });
-    };
+    // Forign Keys
+    blog.belongsTo(FileUploads, { foreignKey: 'image', targetKey: 'id'});
+    blog.belongsTo(Users, { foreignKey: 'userId', targetKey: 'id'});
+
     return blog;
 }

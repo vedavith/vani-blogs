@@ -1,6 +1,7 @@
 const db = require("../models");
-
 const blogs = db.blog;
+const users = db.users;
+const fileUploads = db.fileUpload;
 
 // Create new blog
 exports.createBlog = async (req, res) => {
@@ -8,28 +9,24 @@ exports.createBlog = async (req, res) => {
     try {
         var blogData = req.body;
 
-        if (blogData.title == '' || typeof blogData.title == 'undefined') {
+        if (blogData.title === '' || typeof blogData.title == 'undefined') {
             throw new Error("Title is required");
         }
 
-        if (blogData.content == '' || typeof blogData.content == 'undefined') {
+        if (blogData.content === '' || typeof blogData.content == 'undefined') {
             throw new Error('Blog Content is Required');
         }
-
-        //todo: Create a file upload 
+        // upload to S3 bucket
 
         // Create blog
         const blogsData = await blogs.create(blogData);
-
         if (!blogsData) {
             throw new Error('Error occured, Cannot create Blog');
         }
 
-        res.status(200).send({ message : "Blog Created."});
-
-
+        res.status(200).send({message: "Blog Created."});
     } catch (Error) {
-        res.status(400).send({ error: Error.message });
+        res.status(400).send({error: Error.message});
     }
 }
 
@@ -40,24 +37,24 @@ exports.updateBlog = async (req, res) => {
         let blogId = req.params.id;
         var blogData = req.body;
 
-        if (blogId == '' || typeof blogId == 'undefined') {
+        if (blogId === '' || typeof blogId == 'undefined') {
             throw new Error("Invalid Blog ID");
         }
 
-        if (blogData.title == '' || typeof blogData.title == 'undefined') {
+        if (blogData.title === '' || typeof blogData.title == 'undefined') {
             throw new Error("Title is required");
         }
 
-        if (blogData.content == '' || typeof blogData.content == 'undefined') {
+        if (blogData.content === '' || typeof blogData.content == 'undefined') {
             throw new Error('Blog Content is Required');
         }
 
         // Update blog
         const updateBlog = await blogs.update(
-            blogData, 
+            blogData,
             {
-                where: { 
-                    id: blogId 
+                where: {
+                    id: blogId
                 }
             });
 
@@ -68,7 +65,7 @@ exports.updateBlog = async (req, res) => {
         res.send("Blog Updated");
 
     } catch (Error) {
-        res.status(204).send({ message: Error.message });
+        res.status(204).send({message: Error.message});
     }
 }
 
@@ -77,13 +74,13 @@ exports.deleteBlog = async (req, res) => {
     res.contentType('json');
     try {
         let blogId = req.params.id;
-        if (blogId == '' || typeof blogId == 'undefined') {
+        if (blogId === '' || typeof blogId == 'undefined') {
             throw new Error("Invalid Blog ID");
         }
         // delete blog
         const deleteBlog = await blogs.destroy({
             where: {
-                id : blogId
+                id: blogId
             }
         });
 
@@ -94,7 +91,7 @@ exports.deleteBlog = async (req, res) => {
         res.status(200).send({message: "Blog Deleted"});
 
     } catch (Error) {
-        res.send({message : Error.message});
+        res.send({message: Error.message});
     }
 }
 
@@ -102,16 +99,29 @@ exports.deleteBlog = async (req, res) => {
 exports.getBlogs = async (req, res) => {
     res.contentType('json');
     try {
-        
         // Get all blogs
-        const allBlogs = await blogs.findAll();
+        const allBlogs = await blogs.findAll({
+            include: [
+                {
+                    model: fileUploads,
+                    attributes: ['id', 'filePath'],
+                    where: {isDeleted: false},
+                    required: false,
+                },
+                {
+                    model: users,
+                    attributes: ['id', 'email', 'first_name', 'last_name'],
+                    required: false,
+                }
+            ]
+        });
         if (!allBlogs) {
             throw new Error("No Blogs Found");
         }
         // Return All Blogs
         res.status(200).send({blogs: allBlogs});
     } catch (Error) {
-        res.send({ message: Error.message});
+        res.send({message: Error.message});
     }
 }
 
@@ -124,20 +134,28 @@ exports.getBlogOnId = async (req, res) => {
         // Query blog on ID
         const blogData = await blogs.findOne({
             where: {
-               id:  blogId
-            }
+                id: blogId
+            },
+            include: [
+                {
+                    model: fileUploads,
+                    attributes: ['id', 'filePath'],
+                    where: {isDeleted: false},
+                    required: false,
+                },
+                {
+                    model: users,
+                    attributes: ['id', 'email', 'first_name', 'last_name'],
+                    required: false,
+                }
+            ]
         })
         if (!blogData) {
             throw new Error("No Blogs Found");
         }
 
-        res.status(200).send({ blog : blogData });
+        res.status(200).send({blog: blogData});
     } catch (Error) {
-        res.send({ message: Error.message });
+        res.send({message: Error.message});
     }
-}
-
-// Use S3 Bucket upload
-let fileUpload = (file) => {
-    return true;
 }

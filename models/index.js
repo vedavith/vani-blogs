@@ -19,8 +19,9 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.users = require("./user.model.js")(sequelize, Sequelize);
-db.auth = require("./auth.model.js")(sequelize, Sequelize);
-db.blog = require("./blog.model.js")(sequelize,Sequelize);
+db.users = require("./user.model.js")(sequelize);
+db.auth = require("./auth.model.js")(sequelize);
+db.fileUpload = require('./fileUpload.model.js')(sequelize);
+db.blog = require("./blog.model.js")(sequelize, db.fileUpload, db.users);
 
 module.exports = db;
