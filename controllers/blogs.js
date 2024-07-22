@@ -1,4 +1,5 @@
 const db = require("../models");
+const {Sequelize} = require("sequelize");
 const blogs = db.blog;
 const users = db.users;
 const fileUploads = db.fileUpload;
@@ -16,9 +17,10 @@ exports.createBlog = async (req, res) => {
         if (blogData.content === '' || typeof blogData.content == 'undefined') {
             throw new Error('Blog Content is Required');
         }
-        // upload to S3 bucket
+        // todo: upload to S3 bucket
 
         // Create blog
+        blogData.userId = req.session.user.id;
         const blogsData = await blogs.create(blogData);
         if (!blogsData) {
             throw new Error('Error occured, Cannot create Blog');
@@ -104,13 +106,20 @@ exports.getBlogs = async (req, res) => {
             include: [
                 {
                     model: fileUploads,
-                    attributes: ['id', 'filePath'],
+                    attributes: [
+                        ['id', 'fileId'],
+                        ['fileLocation', 'fileLocation']
+                    ],
                     where: {isDeleted: false},
                     required: false,
                 },
                 {
                     model: users,
-                    attributes: ['id', 'email', 'first_name', 'last_name'],
+                    attributes: [
+                        'id',
+                        'email',
+                        [Sequelize.fn('CONCAT',  Sequelize.col('first_name'), ' ', Sequelize.col('last_name')), 'name']
+                    ],
                     required: false,
                 }
             ]
@@ -118,6 +127,7 @@ exports.getBlogs = async (req, res) => {
         if (!allBlogs) {
             throw new Error("No Blogs Found");
         }
+        console.log("This is from blogs", req.session);
         // Return All Blogs
         res.status(200).send({blogs: allBlogs});
     } catch (Error) {
@@ -139,13 +149,61 @@ exports.getBlogOnId = async (req, res) => {
             include: [
                 {
                     model: fileUploads,
-                    attributes: ['id', 'filePath'],
+                    attributes: [
+                        ['id', 'fileId'],
+                        ['fileLocation', 'fileLocation']
+                    ],
                     where: {isDeleted: false},
                     required: false,
                 },
                 {
                     model: users,
-                    attributes: ['id', 'email', 'first_name', 'last_name'],
+                    attributes: [
+                        'id',
+                        'email',
+                        [Sequelize.fn('CONCAT',  Sequelize.col('first_name'), ' ', Sequelize.col('last_name')), 'name']
+                    ],
+                    required: false,
+                }
+            ]
+        })
+        if (!blogData) {
+            throw new Error("No Blogs Found");
+        }
+
+        res.status(200).send({blog: blogData});
+    } catch (Error) {
+        res.send({message: Error.message});
+    }
+}
+
+// Get all Blogs on the user ID
+exports.getAllBlogsOnUserId = async (req, res) => {
+    res.contentType('json');
+    try {
+        const userId = req.params.userId;
+        // Query blog on ID
+        const blogData = await blogs.findAll({
+            where: {
+                userId: userId
+            },
+            include: [
+                {
+                    model: fileUploads,
+                    attributes: [
+                        ['id', 'fileId'],
+                        ['fileLocation', 'fileLocation']
+                    ],
+                   // where: {isDeleted: false},
+                    required: false,
+                },
+                {
+                    model: users,
+                    attributes: [
+                        'id',
+                        'email',
+                        [Sequelize.fn('CONCAT',  Sequelize.col('first_name'), ' ', Sequelize.col('last_name')), 'name']
+                    ],
                     required: false,
                 }
             ]

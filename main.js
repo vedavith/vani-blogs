@@ -1,21 +1,30 @@
 // Configuratiion
 const express = require('express');
+var session = require('express-session');
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
 const port = 4000;
 
 // enabling CORS
-app.use(cors());
+app.use(cors({credentials: true, origin: true, exposedHeaders: '*'}));
 
 // allowing all traffic
-app.options('*', cors());
+app.options('*', cors({credentials: true, origin: true, exposedHeaders: '*'}));
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
+app.use(session({
+    secret: 'sessionKey',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: true
+    }
+}));
 
 //initilalize sequelize
 const db = require("./models");
@@ -37,7 +46,10 @@ app.post('/user/register', login.userRegistration);
 
 // Blogs
 app.get('/blogs/all', blogs.getBlogs);
+app.get('/blogs/user/:userId/all', blogs.getAllBlogsOnUserId);
+
 app.get('/blog/:id/get', blogs.getBlogOnId);
+
 app.post('/blog/create', login.verifyUserToken, blogs.createBlog);
 app.put('/blog/:id/update', login.verifyUserToken, blogs.updateBlog);
 app.delete('blog/:id/delete', login.verifyUserToken, blogs.deleteBlog);

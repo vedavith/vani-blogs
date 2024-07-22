@@ -35,26 +35,33 @@ exports.userLogin = async (req, res) => {
         }
 
         // Generate JWT Token and update the token on each login
-        let userDetails = {id: user.id, email: user.email, name: user.first_name + " " + user.last_name};
-        let token = jwt.sign(userDetails, jwtSecret, jwtOptions);
+        let userDetails = {
+            id: user.id,
+            email: user.email,
+            name: user.first_name + " " + user.last_name,
+        };
 
+        // Setting JWT
+        let token = jwt.sign(userDetails, jwtSecret, jwtOptions);
         if (!token) {
             throw new Error("Access token not generation Failed");
         }
 
+        // Update User Auth Data
         let userAuth = authData.update({token: token}, {
             where: {
                 userId: user.id
             }
         });
-
         if (!userAuth) {
             throw new Error("Access token not generation Failed - 2");
         }
 
+        // Setting Auth Token
         res.setHeader('authorization', token);
+        // Sending access token in response
+        userDetails.accessToken = token;
         res.send({user: userDetails});
-
     } catch (Error) {
         res.send({Message: Error.message});
     }
@@ -99,16 +106,19 @@ exports.userRegistration = async (req, res) => {
 exports.verifyUserToken = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
-        if (!this.isValidJwt(authHeader)) {
+        let sessionData = {token: null};
+        if (!this.isValidJwt(authHeader, sessionData)) {
             throw new Error("JWT verification failed");
         }
+        // Setting session
+        req.session.user = sessionData.token;
         next();
     } catch (Error) {
         res.status(401).send({ message: Error.message });
     }
 };
 
-exports.isValidJwt = (authHeader) => {
+exports.isValidJwt = (authHeader, sessionData) => {
 
     let token = authHeader && authHeader.split(' ')[1];
     if (!token) {
@@ -123,5 +133,7 @@ exports.isValidJwt = (authHeader) => {
     if (((isValidToken.exp - isValidToken.iss) > 0)) {
         return false;
     }
+
+    sessionData.token = isValidToken;
     return true;
 }
