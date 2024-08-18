@@ -9,6 +9,10 @@ const db = require('../models');
 const users = db.users;
 const authData = db.auth;
 
+exports.health = async(req, res) => {
+    res.send({response: 200});
+};
+
 exports.userLogin = async (req, res) => {
     res.contentType('json');
     let loginUser;
@@ -36,7 +40,7 @@ exports.userLogin = async (req, res) => {
 
         // Generate JWT Token and update the token on each login
         let userDetails = {
-            id: user.id,
+            userId: user.id,
             email: user.email,
             name: user.first_name + " " + user.last_name,
         };

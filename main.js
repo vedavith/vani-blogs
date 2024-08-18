@@ -43,11 +43,11 @@ var fileUploads = require('./controllers/fileUploads');
 app.post('/login/auth', login.userLogin);
 app.post('/token/verify', login.verifyUserToken);
 app.post('/user/register', login.userRegistration);
+app.get('user/health', login.health)
 
 // Blogs
 app.get('/blogs/all', blogs.getBlogs);
 app.get('/blogs/user/:userId/all', blogs.getAllBlogsOnUserId);
-
 app.get('/blog/:id/get', blogs.getBlogOnId);
 
 app.post('/blog/create', login.verifyUserToken, blogs.createBlog);

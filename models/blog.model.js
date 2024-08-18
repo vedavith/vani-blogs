@@ -25,6 +25,8 @@ module.exports = (sequelize, FileUploads, Users) => {
     // Forign Keys
     blog.belongsTo(FileUploads, { foreignKey: 'image', targetKey: 'id'});
     blog.belongsTo(Users, { foreignKey: 'userId', targetKey: 'id'});
-
+    blog.addScope('withoutUserId', {
+        attributes: { exclude: ['userId'] }
+    });
     return blog;
 }

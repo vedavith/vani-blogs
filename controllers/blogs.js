@@ -8,7 +8,7 @@ const fileUploads = db.fileUpload;
 exports.createBlog = async (req, res) => {
     res.contentType('json');
     try {
-        var blogData = req.body;
+        const blogData = req.body;
 
         if (blogData.title === '' || typeof blogData.title == 'undefined') {
             throw new Error("Title is required");
@@ -37,7 +37,7 @@ exports.updateBlog = async (req, res) => {
     res.contentType('json');
     try {
         let blogId = req.params.id;
-        var blogData = req.body;
+        const blogData = req.body;
 
         if (blogId === '' || typeof blogId == 'undefined') {
             throw new Error("Invalid Blog ID");
@@ -52,13 +52,7 @@ exports.updateBlog = async (req, res) => {
         }
 
         // Update blog
-        const updateBlog = await blogs.update(
-            blogData,
-            {
-                where: {
-                    id: blogId
-                }
-            });
+        const updateBlog = await blogs.update(blogData,{ where: { id: blogId }});
 
         if (!updateBlog) {
             throw new Error("Could not update blog");
@@ -79,13 +73,9 @@ exports.deleteBlog = async (req, res) => {
         if (blogId === '' || typeof blogId == 'undefined') {
             throw new Error("Invalid Blog ID");
         }
-        // delete blog
-        const deleteBlog = await blogs.destroy({
-            where: {
-                id: blogId
-            }
-        });
 
+        // delete blog
+        const deleteBlog = await blogs.destroy({ where: { id: blogId }});
         if (!deleteBlog) {
             throw new Error("Could not delete blog")
         }
@@ -106,6 +96,7 @@ exports.getBlogs = async (req, res) => {
             include: [
                 {
                     model: fileUploads,
+                    //as: 'fileUpload',
                     attributes: [
                         ['id', 'fileId'],
                         ['fileLocation', 'fileLocation']
@@ -115,8 +106,9 @@ exports.getBlogs = async (req, res) => {
                 },
                 {
                     model: users,
+                    //as: 'user',
                     attributes: [
-                        'id',
+                       // ['id', 'userId'],
                         'email',
                         [Sequelize.fn('CONCAT',  Sequelize.col('first_name'), ' ', Sequelize.col('last_name')), 'name']
                     ],
@@ -159,7 +151,7 @@ exports.getBlogOnId = async (req, res) => {
                 {
                     model: users,
                     attributes: [
-                        'id',
+                        ['id', 'userId'],
                         'email',
                         [Sequelize.fn('CONCAT',  Sequelize.col('first_name'), ' ', Sequelize.col('last_name')), 'name']
                     ],
@@ -200,7 +192,7 @@ exports.getAllBlogsOnUserId = async (req, res) => {
                 {
                     model: users,
                     attributes: [
-                        'id',
+                        ['id', 'userId'],
                         'email',
                         [Sequelize.fn('CONCAT',  Sequelize.col('first_name'), ' ', Sequelize.col('last_name')), 'name']
                     ],
